@@ -3,43 +3,54 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserModel;
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
 
 class UserController extends Controller
 {
     public function index()
     {
-        $user = UserModel::create([
-            'username' => 'manager101',  
-            'nama'     => 'Manager101',
-            'password' => Hash::make('12345'),  
-            'level_id' => 2
-        ]);
-        $user->username = 'manager15';
+        $user = UserModel::all(); // mengambil semua data dari tabel user   
+        return view('user', ['data' => $user]);
 
-       /* $user->isDirty(); // true
-        $user->isDirty('username'); // true
-        $user->isDirty('nama'); // false
-        $user->isDirty(['nama', 'username']); // true
+    }
+    public function tambah()
+    {
+        return view('user_tambah');
+    }
+    public function tambah_simpan(Request $request)
+    {
+        UserModel::create([
+            'username' => $request->username,
+            'nama' => $request->nama,
+            'password' => Hash::make($request->password), // mengenkripsi password sebelum disimpan
+            'level_id' => $request->level_id
+        ]); 
 
-        $user->isClean(); // false
-        $user->isClean('username'); // false
-        $user->isClean('nama'); // true
-        $user->isClean(['nama', 'username']); // false 
+        return redirect('/user'); // mengarahkan kembali ke halaman user setelah menyimpan data
+    }
+    public function ubah($id)
+    {
+        $user = UserModel::find($id); // mencari data user berdasarkan id
+        return view('user_ubah', ['data' => $user]);
+    }
+    public function ubah_simpan($id, Request $request)
+    {
+        $user = UserModel::find($id); // mencari data user berdasarkan id
+        
+        $user->username = $request->username;
+        $user->nama = $request->nama;
+        $user->password = Hash::make($request->password); // mengenkripsi password sebelum disimpan
+        $user->level_id = $request->level_id;
+        $user->save(); // menyimpan perubahan data user
 
-        $user->isDirty(); // false
-        $user->isClean(); // true
-        dd($user->isDirty()); */
+        return redirect('/user'); // mengarahkan kembali ke halaman user setelah menyimpan perubahan
+    }
+    public function hapus($id)
+    {
+        $user = UserModel::find($id); // mencari data user berdasarkan id
+        $user->delete(); // menghapus data user
 
-        $user->save();
-
-        $user->wasChanged(); // true
-        $user->wasChanged('username'); // true 
-        $user->wasChanged(['username', 'level_id']); // true
-        $user->wasChanged('nama'); // false 
-        dd($user->wasChanged(['nama', 'username'])); // true
-
+        return redirect('/user'); // mengarahkan kembali ke halaman user setelah menghapus data
     }
 }
